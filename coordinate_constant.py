@@ -4,8 +4,10 @@ import json, os
 logs_44k = f'logs{os.sep}44k'
 result = 'results'
 spkdict: dict = {
-    "nguyenngocngan": "Nguyễn Ngọc Ngạn",
+    "nguyenngocngan": "Nguyễn Ngọc Ngạn demo",
     "songoku": "Songoku",
+    "KyDuyen": "Kì Duyên",
+    "NGN": "Nguyễn Ngọc Ngạn",
 }
 spkdict_: dict = {v: k for k, v in spkdict.items()}
 aud___intypelist = ['mp3', 'wav', ]

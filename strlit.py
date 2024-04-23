@@ -1,4 +1,5 @@
 import os
+
 import streamlit as st
 
 from inference_main import main
@@ -42,6 +43,34 @@ def main_loop():
             "Upload file",
             type=aud___intypelist
             )
+        f0pre = st.radio(
+            "Select a F0 predictor (f0 mean pooling will be enable when using crepe)",
+            [
+                f"{s}" for s in [
+                'crepe',
+                'pm',
+                'dio',
+                'harvest',
+                'rmvpe',
+                'fcpe'
+            ]
+            ],
+            index=1,
+            # captions=["Laugh out loud.", "Get the popcorn.", "Never stop learning."]
+        )
+        paramdict["f0_predictor"] = f0pre
+        # # assert 'checkpoint_best_legacy_500_.pt' in os.listdir('pretrain')
+        # # assert 'hubert_base.pt' in os.listdir('pretrain')
+        # sp_enco = st.radio(
+        #     "Select speech encoder",
+        #     [
+        #         f"{s}" for s in [
+        #         'checkpoint_best_legacy_500',
+        #         'hubert-soft-0d54a1f4',
+        #         ]
+        #     ],
+        # )
+        # paramdict["speech_encoder"] = sp_enco  # TODO
 
     with col2:
         spk_list = st.radio(
@@ -71,7 +100,7 @@ def main_loop():
                     ],
                     # captions=["Laugh out loud.", "Get the popcorn.", "Never stop learning."]
                 )
-                paramdict["spk_list"] = spk_list_
+                paramdict["spk_list"] = spk_list_.replace("*", "")
             else:
                 try:
                     paramdict["spk_list"] = list(conf_['spk'].keys())[0]
@@ -98,34 +127,80 @@ def main_loop():
             paramdict["model_path"] = f"{logs_44k_spklist}{os.sep}{model_path}"
             submit = st.form_submit_button('RUN!')  # https://blog.streamlit.io/introducing-submit-button-and-forms/
 
+    paramdict["auto_predict_f0"] = False
+    paramdict["feature_retrieval"] = False
+    paramdict["use_spk_mix"] = False
+    paramdict["second_encoding"] = False
+    paramdict["clean_names"] = ''
+    with col3:
+        # slice_db = st.slider(
+        #     "The default is -40, noisy sounds can be -30, dry sounds can be -50 to maintain breathing.",
+        #     min_value=-50,
+        #     max_value=-30,
+        #     value=-40
+        # )  # TODO
+        # paramdict["slice_db"] = slice_db
+
+        agree = st.checkbox('automatic ***pitch_prediction***, do not enable this when converting singing voices as it can cause serious pitch issues')
+        if agree:
+            paramdict["auto_predict_f0"] = True
+            paramdict["clean_names"] += 'pitch_prediction_'
+        a0gree = st.checkbox('Whether to use feature ***retrieval***. If clustering model is used, it will be disabled, and cm and cr parameters will become the index path and mixing ratio of feature retrieval')
+        if a0gree:
+            paramdict["feature_retrieval"] = True
+            paramdict["clean_names"] += 'retrieval_'
+        a1gree = st.checkbox('whether to use ***dynamic_voice_fusion***')
+        if a1gree:
+            paramdict["use_spk_mix"] = True
+            paramdict["clean_names"] += 'dynamic_voice_fusion_'
+        a2gree = st.checkbox('which involves applying an ***additional_encoding*** to the original audio before shallow diffusion. This option can yield varying results - sometimes positive and sometimes negative')
+        if a2gree:
+            paramdict["second_encoding"] = True
+            paramdict["clean_names"] += 'additional_encoding_'
+
     st.sidebar.button('xóa lịch sử', on_click=dehi)
     if not submit:
         return None
     if aud___in is None:  # AttributeError: 'NoneType' object has no attribute 'name'
         st.write('upload file again!')
         return None
-    paramdict["clean_names"] = f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{aud___in.name}'  # cn_nes  # -n
+    paramdict["clean_names"] += f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{aud___in.name}'  # cn_nes  # -n
     tempfile = os.path.join("raw", paramdict["clean_names"])
     with open(tempfile, "wb") as f:
         f.write(aud___in.getbuffer())
     paramdict["trans"] = 0  # -t
+
     if debug:
-        st.write("python3 inference_main.py" +
-                 f''' -m "{paramdict['model_path']}"''' +
-                 f''' -c "{paramdict['config_path']}"''' +
-                 f''' -n "{paramdict["clean_names"]}"''' +
-                 f''' -t {paramdict["trans"]}''' +
-                 f''' -s "{paramdict["spk_list"]}"'''
-                 )
-    else:
-        paramlist = [
-            '-m', paramdict['model_path'],
-            '-c', paramdict['config_path'],
-            '-n', paramdict["clean_names"],
-            '-t', paramdict["trans"],
-            '-s', paramdict["spk_list"]
-        ]
-        main(paramlist)
+        command = "python3 inference_main.py" + \
+                  f''' -m "{paramdict['model_path']}"''' + \
+                  f''' -c "{paramdict['config_path']}"''' + \
+                  f''' -n "{paramdict["clean_names"]}"''' + \
+                  f''' -t {paramdict["trans"]}''' + \
+                  f''' -s "{paramdict["spk_list"]}"''' + \
+                  f''' -f0p "{paramdict["f0_predictor"]}"'''  # + \
+                  # f''' -sd {paramdict["slice_db"]}'''
+        if paramdict["auto_predict_f0"]: command += ' -a'
+        if paramdict["feature_retrieval"]: command += ' -fr'
+        if paramdict["use_spk_mix"]: command += ' -usm'
+        if paramdict["second_encoding"]: command += ' -se'
+        st.write(command)
+
+    paramlist = [
+        '-m', paramdict['model_path'],
+        '-c', paramdict['config_path'],
+        '-n', paramdict["clean_names"],
+        '-t', paramdict["trans"],
+        '-s', paramdict["spk_list"],
+        '-f0p', paramdict["f0_predictor"],
+        # '-sd', paramdict["slice_db"],  # TODO
+        # '-wf', 'wav',  # TODO
+    ]
+    if paramdict["auto_predict_f0"]: paramlist.append('-a')
+    if paramdict["feature_retrieval"]: paramlist.append('-fr')
+    if paramdict["use_spk_mix"]: paramlist.append('-usm')
+    if paramdict["second_encoding"]: paramlist.append('-se')
+    main(paramlist)
+
     resu = os.listdir(result)
     for out___mp4 in resu:
         if not out___mp4.endswith('.flac'):
@@ -146,4 +221,4 @@ def main_loop():
 
 paramdict: dict = dict()
 if __name__ == '__main__':
-    main_loop()  # streamlit run strlit.py
+    main_loop()  # streamlit run strlit.py --server.port 8502
