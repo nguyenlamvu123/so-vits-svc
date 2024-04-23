@@ -10,6 +10,13 @@ from coordinate_constant import \
 def main_loop():
     global paramdict
 
+    def dehi():
+        resu = os.listdir(result)
+        for out___mp4 in resu:
+            if not out___mp4.endswith('.flac'):
+                continue
+            os.remove(os.path.join(result, out___mp4))
+
     st.title("FAKE VOICE")
 
     # show at the end of page
@@ -41,7 +48,7 @@ def main_loop():
             "Select the speaker ID to use for conversion",
             [
                 # ":rainbow[Comedy]",
-                f"***{spkdict[spk]}***" for spk in os.listdir(logs_44k)
+                f"***{spkdict[spk]}***" for spk in os.listdir(logs_44k) if spk in spkdict
                 # "Documentary :movie_camera:"
             ],
             # captions=["Laugh out loud.", "Get the popcorn.", "Never stop learning."]
@@ -77,7 +84,12 @@ def main_loop():
             model_path = st.radio(
                 "select model",
                 [
-                    f"***{s}***" for s in os.listdir(logs_44k_spklist) if s.endswith('.pth')
+                    f"***{s}***" for s in os.listdir(logs_44k_spklist) if all(
+                    [
+                        s.endswith('.pth'),
+                        'G_' in s,
+                    ]
+                )
                 ],
                 # captions=["Laugh out loud.", "Get the popcorn.", "Never stop learning."]
             )
@@ -86,20 +98,22 @@ def main_loop():
             paramdict["model_path"] = f"{logs_44k_spklist}{os.sep}{model_path}"
             submit = st.form_submit_button('RUN!')  # https://blog.streamlit.io/introducing-submit-button-and-forms/
 
+    st.sidebar.button('xóa lịch sử', on_click=dehi)
     if not submit:
         return None
     if aud___in is None:  # AttributeError: 'NoneType' object has no attribute 'name'
         st.write('upload file again!')
         return None
-    with open(os.path.join("raw", cn_nes), "wb") as f:
+    paramdict["clean_names"] = f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{aud___in.name}'  # cn_nes  # -n
+    tempfile = os.path.join("raw", paramdict["clean_names"])
+    with open(tempfile, "wb") as f:
         f.write(aud___in.getbuffer())
-    paramdict["clean_names"] = cn_nes  # -n
     paramdict["trans"] = 0  # -t
     if debug:
         st.write("python3 inference_main.py" +
                  f''' -m "{paramdict['model_path']}"''' +
                  f''' -c "{paramdict['config_path']}"''' +
-                 f''' -n "{paramdict['clean_names']}"''' +
+                 f''' -n "{paramdict["clean_names"]}"''' +
                  f''' -t {paramdict["trans"]}''' +
                  f''' -s "{paramdict["spk_list"]}"'''
                  )
@@ -107,7 +121,7 @@ def main_loop():
         paramlist = [
             '-m', paramdict['model_path'],
             '-c', paramdict['config_path'],
-            '-n', paramdict['clean_names'],
+            '-n', paramdict["clean_names"],
             '-t', paramdict["trans"],
             '-s', paramdict["spk_list"]
         ]
@@ -127,6 +141,7 @@ def main_loop():
     #             file_name=out___mp4,
     #             mime='wav',
     #         )
+    os.rename(tempfile, cn_nes)
 
 
 paramdict: dict = dict()
