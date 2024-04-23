@@ -1,17 +1,18 @@
 import logging
 
 import soundfile
+from coordinate_constant import debug
+if not debug:
+    from inference import infer_tool
+    from inference.infer_tool import Svc
+    from spkmix import spk_mix_map
 
-from inference import infer_tool
-from inference.infer_tool import Svc
-from spkmix import spk_mix_map
-
-logging.getLogger('numba').setLevel(logging.WARNING)
-chunks_dict = infer_tool.read_temp("inference/chunks_temp.json")
+    logging.getLogger('numba').setLevel(logging.WARNING)
+    chunks_dict = infer_tool.read_temp("inference/chunks_temp.json")
 
 
 
-def main():
+def main(lis):
     import argparse
 
     parser = argparse.ArgumentParser(description='sovits4 inference')
@@ -55,7 +56,8 @@ def main():
     parser.add_argument('-ft', '--f0_filter_threshold', type=float, default=0.05,help='F0过滤阈值，只有使用crepe时有效. 数值范围从0-1. 降低该值可减少跑调概率，但会增加哑音')
 
 
-    args = parser.parse_args()
+    args = parser.parse_args((lis))
+    # args = parser.parse_args((['-m', 'logs/44k/nguyenngocngan/G_1001.pth', '-c', 'logs/44k/nguyenngocngan/config.json']))
 
     clean_names = args.clean_names
     trans = args.trans
