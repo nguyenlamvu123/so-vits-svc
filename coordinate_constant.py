@@ -18,29 +18,26 @@ listofsubtempaudio = 'mylist.txt'
 temp: str = 'temp'
 tempa: str = temp + '_audio.wav'
 osgetcwd = os.getcwd()
-debug = True
+debug = False
 
 
 def f_fmpeg(duongdan: str, tempname: str or None = None, outmp4: str or None = None, *args, **kwargs) -> bool :
     # make sub: https://ffmpeg.org//ffmpeg-filters.html#amix
     f___g: str = 'ffmpeg' if debug else 'ffmpeg -loglevel quiet'
+    outmp4_: str = outmp4 if outmp4 is not None else os.path.join(osgetcwd, tempa)
     if 'convert format (ext)' in args:
-        coma: str = f___g + ' -i ' + duongdan + ' ' + os.path.join(osgetcwd, tempa) + ' -y'
+        coma: str = f___g + ' -i ' + duongdan + ' ' + outmp4_ + ' -y'
     elif 'cut video' in args[0]:
         coma: str = f___g + ' -i ' + duongdan + \
-            ' -vcodec copy -acodec copy -ss ' + args[1] + ' -to ' + args[2] + \
-            ' ' + os.path.join(osgetcwd, tempa) + ' -y'
+            ' -vcodec copy -acodec copy -ss ' + args[1] + ' -to ' + args[2] + ' ' + outmp4_ + ' -y'
     elif 'concat' in args:
-        outmp4_: str = outmp4 if outmp4 is not None else os.path.join(osgetcwd, tempa)
         coma: str = f___g + ' -f concat -safe 0 -i ' + listofsubtempaudio + ' -c copy ' + outmp4_ + ' -y'
     elif 'amixaudio' in args:
         assert 'amixstring' in kwargs
         assert 'lenlis' in kwargs
-        if outmp4 is None:
-            outmp4 = os.path.join(osgetcwd, tempa)
         coma: str = f___g + kwargs['amixstring'] + \
                     ' -filter_complex amix=inputs=' + kwargs['lenlis'] + \
-                    ':duration=first:dropout_transition=' + kwargs['lenlis'] + ' ' + outmp4 + ' -y'
+                    ':duration=first:dropout_transition=' + kwargs['lenlis'] + ' ' + outmp4_ + ' -y'
     else:
         if tempname is None:  # coppy audio từ video gốc thành temp_audio.mp3
             # https://viblo.asia/p/ffmpeg-va-20-cau-lenh-co-ban-xu-ly-am-thanh-hinh-anh-va-video-naQZRYBAKvx
