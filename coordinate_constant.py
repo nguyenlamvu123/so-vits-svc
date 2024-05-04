@@ -1,4 +1,4 @@
-import json, os
+import json, os, requests
 
 
 logs_44k = f'logs{os.sep}44k'
@@ -19,6 +19,12 @@ temp: str = 'temp'
 tempa: str = temp + '_audio.wav'
 osgetcwd = os.getcwd()
 debug = False
+
+headers = {
+    'Content-Type': 'application/json'
+}
+host = '172.11.11.91' if debug is False else 'localhost'
+postapi = f'http://{host}:8000/nhaigiong91/'  # TODO
 
 
 def f_fmpeg(duongdan: str, tempname: str or None = None, outmp4: str or None = None, *args, **kwargs) -> bool :
@@ -79,6 +85,26 @@ def readfile(file="uid.txt", mod="r", cont=None, jso: bool = False):
                 fil_e.write(cont)
             else:
                 json.dump(cont, fil_e, indent=2, ensure_ascii=False)
+
+
+def post2api(method, jso=None):
+    try:
+        if method == "POST":
+            payload = json.dumps(jso)
+            response = requests.request(method, postapi, headers=headers, data=payload)
+        else:  # elif method == "GET":
+            payload = None
+            response = requests.request(method, postapi, headers=headers)
+        if not response.status_code == 200:
+            if debug:
+                print('><><><><>< !!!!!!!!!', response.status_code, response.text, payload)
+        else:
+            if debug:
+                print('***********', response.text)
+            return True
+    except requests.exceptions.ConnectionError:
+        print('><><><><>< !!!!!!!!! requests.exceptions.ConnectionError')
+    return False
 
 
 def makemylisttxt(lis: list):

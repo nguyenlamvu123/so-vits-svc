@@ -5,7 +5,7 @@ import streamlit as st
 from inference_main import main
 from coordinate_constant import \
     raw, result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, \
-    readfile, makemylisttxt, f_fmpeg
+    readfile, makemylisttxt, f_fmpeg, post2api
 from slicer2 import main as sli_mai
 
 
@@ -15,9 +15,10 @@ def main_loop():
     def dehi():
         resu = os.listdir(result)
         for out___mp4 in resu:
-            if not out___mp4.endswith('.flac'):
-                continue
-            os.remove(os.path.join(result, out___mp4))
+            if any([
+                out___mp4.endswith(s) for s in ('.flac', ext, )
+            ]):
+                os.remove(os.path.join(result, out___mp4))
 
     st.title("FAKE VOICE")
 
@@ -174,6 +175,10 @@ def main_loop():
     if aud___in is None:  # AttributeError: 'NoneType' object has no attribute 'name'
         st.write('upload file again!')
         return None
+    # TODO return None if status is busy
+    if not post2api("GET"):
+        st.write('error in post2api("GET")')
+        return None
     try:
         shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
     except FileNotFoundError:
@@ -217,7 +222,7 @@ def main_loop():
 
     aud_dir = [sa for sa in os.listdir(raw) if all([
         sa.startswith(os.path.splitext(cn_nes)[0] + '_'),
-        sa.endswith(os.path.splitext(cn_nes)[-1]),
+        sa.endswith(ext),
     ])]
     for subaudio in aud_dir:
         paramlist_ = ['-n', subaudio, ] + paramlist
@@ -230,7 +235,12 @@ def main_loop():
     flaclist.sort(key=lambda x: int(x.split('.')[0][len(os.path.splitext(cn_nes)[0] + '_'):]))
     makemylisttxt(flaclist)
     f_fmpeg('', None, paramdict["clean_names"], 'concat')
-    f_fmpeg(paramdict["clean_names"], None, f'{paramdict["clean_names"][:-len(".flac")]}.wav', 'convert format (ext)')
+    f_fmpeg(
+        paramdict["clean_names"],
+        None,
+        f'{paramdict["clean_names"][:-len(".flac")]}{ext}',
+        'convert format (ext)'
+    )
 
     resu = [paramdict["clean_names"], ] + os.listdir()
     os.chdir('..')
@@ -248,7 +258,7 @@ def main_loop():
             resu.remove(flac)
 
     for out___mp4 in resu:
-        if not out___mp4.endswith('.wav'):
+        if not out___mp4.endswith(ext):
             continue
         data = readfile(file=os.path.join(result, out___mp4), mod="rb")
         st.write(f'{out___mp4}')
@@ -261,8 +271,10 @@ def main_loop():
     #             file_name=out___mp4,
     #             mime='wav',
     #         )
+    post2api("GET")
 
 
 paramdict: dict = dict()
+ext = os.path.splitext(cn_nes)[-1]
 if __name__ == '__main__':
     main_loop()  # streamlit run strlit.py --server.port 8502
