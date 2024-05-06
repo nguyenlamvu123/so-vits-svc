@@ -375,7 +375,7 @@ class Svc(object):
                         ):
         if use_spk_mix:
             if len(self.spk2id) == 1:
-                spk = self.spk2id.keys()[0]
+                spk = list(self.spk2id.keys())[0]
                 use_spk_mix = False
         wav_path = Path(raw_audio_path).with_suffix('.wav')
         chunks = slicer.cut(wav_path, db_thresh=slice_db)

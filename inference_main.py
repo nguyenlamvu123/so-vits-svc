@@ -1,14 +1,12 @@
 import logging
 
 import soundfile
-from coordinate_constant import debug
-if not debug:
-    from inference import infer_tool
-    from inference.infer_tool import Svc
-    from spkmix import spk_mix_map
+from inference import infer_tool
+from inference.infer_tool import Svc
+from spkmix import spk_mix_map
 
-    logging.getLogger('numba').setLevel(logging.WARNING)
-    chunks_dict = infer_tool.read_temp("inference/chunks_temp.json")
+logging.getLogger('numba').setLevel(logging.WARNING)
+chunks_dict = infer_tool.read_temp("inference/chunks_temp.json")
 
 
 
