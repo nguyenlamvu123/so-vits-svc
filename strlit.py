@@ -57,9 +57,18 @@ def main_loop():
             ]
             ],
             index=1,
-            # captions=["Laugh out loud.", "Get the popcorn.", "Never stop learning."]
+            captions=["usually works best", ]
         )
         paramdict["f0_predictor"] = f0pre
+        speaker_id = st.slider(
+            "pitch shift, supports positive and negative (semitone) values",
+            min_value=-36,
+            max_value=36,
+            step=1,
+            value=12
+        )
+        paramdict["trans"] = str(speaker_id)  # -t
+        db_thresh = st.slider("The dB threshold for silence detection", min_value=-60, max_value=60, step=20, value=-40)
         # # assert 'checkpoint_best_legacy_500_.pt' in os.listdir('pretrain')
         # # assert 'hubert_base.pt' in os.listdir('pretrain')
         # sp_enco = st.radio(
@@ -132,7 +141,7 @@ def main_loop():
     paramdict["feature_retrieval"] = False
     paramdict["use_spk_mix"] = False
     paramdict["second_encoding"] = False
-    paramdict["clean_names"] = ''
+    paramdict["clean_names"] = f'pitchshift{paramdict["trans"]}_{paramdict["f0_predictor"]}_'
     with col3:
         # slice_db = st.slider(
         #     "The default is -40, noisy sounds can be -30, dry sounds can be -50 to maintain breathing.",
@@ -145,7 +154,7 @@ def main_loop():
         agree = st.checkbox('automatic ***pitch_prediction***, do not enable this when converting singing voices as it can cause serious pitch issues')
         if agree:
             paramdict["auto_predict_f0"] = True
-            paramdict["clean_names"] += 'pitch_prediction_'
+            paramdict["clean_names"] += 'pitchprediction_'
         a0gree = st.checkbox('Whether to use feature ***retrieval***. If clustering model is used, it will be disabled, and cm and cr parameters will become the index path and mixing ratio of feature retrieval')
         if a0gree:
             paramdict["feature_retrieval"] = True
@@ -153,11 +162,11 @@ def main_loop():
         a1gree = st.checkbox('whether to use ***dynamic_voice_fusion***')
         if a1gree:
             paramdict["use_spk_mix"] = True
-            paramdict["clean_names"] += 'dynamic_voice_fusion_'
+            paramdict["clean_names"] += 'dynamicvoicefusion_'
         a2gree = st.checkbox('which involves applying an ***additional_encoding*** to the original audio before shallow diffusion. This option can yield varying results - sometimes positive and sometimes negative')
         if a2gree:
             paramdict["second_encoding"] = True
-            paramdict["clean_names"] += 'additional_encoding_'
+            paramdict["clean_names"] += 'additionalencoding_'
 
     st.sidebar.button('xóa lịch sử', on_click=dehi)
     if not submit:
@@ -172,11 +181,10 @@ def main_loop():
 
     paramdict["clean_names"] += \
         f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{os.path.splitext(aud___in.name)[0]}.flac'  # -n
-    with open(cn_nes, "wb") as f:
+    with open(cn_nes, "wb") as f:  # đọc nội dung file tải lên xong ghi lại vào clean_names.wav
         f.write(aud___in.getbuffer())
 
-    sli_mai(['--out', raw, cn_nes])
-    paramdict["trans"] = 0  # -t
+    sli_mai(['--out', raw, '--db_thresh', str(db_thresh), cn_nes])
 
     if debug:
         command = "python3 inference_main.py" + \
@@ -213,7 +221,7 @@ def main_loop():
     ])]
     for subaudio in aud_dir:
         paramlist_ = ['-n', subaudio, ] + paramlist
-        main(paramlist_)
+        main(paramlist_)  # TODO it can decrease execute time more
     os.chdir(result)
     flaclist = [sa for sa in os.listdir() if all([
         sa.startswith(os.path.splitext(cn_nes)[0] + '_'),
@@ -222,8 +230,9 @@ def main_loop():
     flaclist.sort(key=lambda x: int(x.split('.')[0][len(os.path.splitext(cn_nes)[0] + '_'):]))
     makemylisttxt(flaclist)
     f_fmpeg('', None, paramdict["clean_names"], 'concat')
+    f_fmpeg(paramdict["clean_names"], None, f'{paramdict["clean_names"][:-len(".flac")]}.wav', 'convert format (ext)')
 
-    resu = os.listdir()
+    resu = [paramdict["clean_names"], ] + os.listdir()
     os.chdir('..')
     if debug:
         name = str(__file__).split(os.sep)[-1]
@@ -239,11 +248,11 @@ def main_loop():
             resu.remove(flac)
 
     for out___mp4 in resu:
-        if not out___mp4.endswith('.flac'):
+        if not out___mp4.endswith('.wav'):
             continue
         data = readfile(file=os.path.join(result, out___mp4), mod="rb")
         st.write(f'{out___mp4}')
-        st.audio(data, format='flac')
+        st.audio(data, format='wav')
     #     with placeholder.container():
     #         st.write(f'{out___mp4} với giọng đọc {speaker_id}')
     #         st.download_button(
