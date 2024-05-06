@@ -1,11 +1,12 @@
-import os
+import os, shutil
 
 import streamlit as st
 
 from inference_main import main
 from coordinate_constant import \
-    result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, \
-    readfile
+    raw, result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, \
+    readfile, makemylisttxt, f_fmpeg
+from slicer2 import main as sli_mai
 
 
 def main_loop():
@@ -164,17 +165,23 @@ def main_loop():
     if aud___in is None:  # AttributeError: 'NoneType' object has no attribute 'name'
         st.write('upload file again!')
         return None
-    paramdict["clean_names"] += f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{aud___in.name}'  # cn_nes  # -n
-    tempfile = os.path.join("raw", paramdict["clean_names"])
-    with open(tempfile, "wb") as f:
+    try:
+        shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
+    except FileNotFoundError:
+        pass
+
+    paramdict["clean_names"] += \
+        f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{os.path.splitext(aud___in.name)[0]}.flac'  # -n
+    with open(cn_nes, "wb") as f:
         f.write(aud___in.getbuffer())
+
+    sli_mai(['--out', raw, cn_nes])
     paramdict["trans"] = 0  # -t
 
     if debug:
         command = "python3 inference_main.py" + \
                   f''' -m "{paramdict['model_path']}"''' + \
                   f''' -c "{paramdict['config_path']}"''' + \
-                  f''' -n "{paramdict["clean_names"]}"''' + \
                   f''' -t {paramdict["trans"]}''' + \
                   f''' -s "{paramdict["spk_list"]}"''' + \
                   f''' -f0p "{paramdict["f0_predictor"]}"'''  # + \
@@ -188,7 +195,7 @@ def main_loop():
     paramlist = [
         '-m', paramdict['model_path'],
         '-c', paramdict['config_path'],
-        '-n', paramdict["clean_names"],
+        # '-n', paramdict["clean_names"],
         '-t', paramdict["trans"],
         '-s', paramdict["spk_list"],
         '-f0p', paramdict["f0_predictor"],
@@ -199,15 +206,44 @@ def main_loop():
     if paramdict["feature_retrieval"]: paramlist.append('-fr')
     if paramdict["use_spk_mix"]: paramlist.append('-usm')
     if paramdict["second_encoding"]: paramlist.append('-se')
-    main(paramlist)
 
-    resu = os.listdir(result)
+    aud_dir = [sa for sa in os.listdir(raw) if all([
+        sa.startswith(os.path.splitext(cn_nes)[0] + '_'),
+        sa.endswith(os.path.splitext(cn_nes)[-1]),
+    ])]
+    for subaudio in aud_dir:
+        paramlist_ = ['-n', subaudio, ] + paramlist
+        main(paramlist_)
+    os.chdir(result)
+    flaclist = [sa for sa in os.listdir() if all([
+        sa.startswith(os.path.splitext(cn_nes)[0] + '_'),
+        sa.endswith('.flac'),
+    ])]
+    flaclist.sort(key=lambda x: int(x.split('.')[0][len(os.path.splitext(cn_nes)[0] + '_'):]))
+    makemylisttxt(flaclist)
+    f_fmpeg('', None, paramdict["clean_names"], 'concat')
+
+    resu = os.listdir()
+    os.chdir('..')
+    if debug:
+        name = str(__file__).split(os.sep)[-1]
+        folds = os.listdir()
+        assert name in folds
+
+    if debug:
+        print('resu before remove: ', resu)
+        print('flaclist: ', flaclist)
+    for flac in flaclist:
+        os.remove(os.path.join(result, flac))
+        if flac in resu:
+            resu.remove(flac)
+
     for out___mp4 in resu:
         if not out___mp4.endswith('.flac'):
             continue
         data = readfile(file=os.path.join(result, out___mp4), mod="rb")
         st.write(f'{out___mp4}')
-        st.audio(data, format='wav')
+        st.audio(data, format='flac')
     #     with placeholder.container():
     #         st.write(f'{out___mp4} với giọng đọc {speaker_id}')
     #         st.download_button(
@@ -216,7 +252,6 @@ def main_loop():
     #             file_name=out___mp4,
     #             mime='wav',
     #         )
-    os.rename(tempfile, cn_nes)
 
 
 paramdict: dict = dict()

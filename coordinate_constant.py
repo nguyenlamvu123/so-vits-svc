@@ -3,6 +3,7 @@ import json, os
 
 logs_44k = f'logs{os.sep}44k'
 result = 'results'
+raw = 'raw'
 spkdict: dict = {
     "nguyenngocngan": "Nguyễn Ngọc Ngạn demo",
     "songoku": "Songoku",
@@ -13,7 +14,51 @@ spkdict_: dict = {v: k for k, v in spkdict.items()}
 aud___intypelist = ['mp3', 'wav', ]
 cn_nes = "clean_names.wav"
 tempjson = "tempjson.txt"
-debug = False
+listofsubtempaudio = 'mylist.txt'
+temp: str = 'temp'
+tempa: str = temp + '_audio.wav'
+osgetcwd = os.getcwd()
+debug = True
+
+
+def f_fmpeg(duongdan: str, tempname: str or None = None, outmp4: str or None = None, *args, **kwargs) -> bool :
+    # make sub: https://ffmpeg.org//ffmpeg-filters.html#amix
+    f___g: str = 'ffmpeg' if debug else 'ffmpeg -loglevel quiet'
+    if 'convert format (ext)' in args:
+        coma: str = f___g + ' -i ' + duongdan + ' ' + os.path.join(osgetcwd, tempa) + ' -y'
+    elif 'cut video' in args[0]:
+        coma: str = f___g + ' -i ' + duongdan + \
+            ' -vcodec copy -acodec copy -ss ' + args[1] + ' -to ' + args[2] + \
+            ' ' + os.path.join(osgetcwd, tempa) + ' -y'
+    elif 'concat' in args:
+        outmp4_: str = outmp4 if outmp4 is not None else os.path.join(osgetcwd, tempa)
+        coma: str = f___g + ' -f concat -safe 0 -i ' + listofsubtempaudio + ' -c copy ' + outmp4_ + ' -y'
+    elif 'amixaudio' in args:
+        assert 'amixstring' in kwargs
+        assert 'lenlis' in kwargs
+        if outmp4 is None:
+            outmp4 = os.path.join(osgetcwd, tempa)
+        coma: str = f___g + kwargs['amixstring'] + \
+                    ' -filter_complex amix=inputs=' + kwargs['lenlis'] + \
+                    ':duration=first:dropout_transition=' + kwargs['lenlis'] + ' ' + outmp4 + ' -y'
+    else:
+        if tempname is None:  # coppy audio từ video gốc thành temp_audio.mp3
+            # https://viblo.asia/p/ffmpeg-va-20-cau-lenh-co-ban-xu-ly-am-thanh-hinh-anh-va-video-naQZRYBAKvx
+            # -vn: disable video
+            coma: str = f___g + ' -i ' + duongdan + ' -vn -ab 320 ' + os.path.join(osgetcwd, tempa) + ' -y'
+            # -ab E…A… set bitrate (in bits/s) (from 0 to INT_MAX) (default 128000)
+        else:  # lắp temp_audio.mp3 đã coppy vào temp_video.mp4 vừa ghi ra thành out.mp4
+            # https://chiaseall.com/tong-hop-code-ffmpeg-suu-tam-se-co-trong-bai-viet-nay/
+            coma: str = f___g + ' -i ' + tempname + ' -i ' + os.path.join(osgetcwd, tempa) + \
+                ' -c copy -map 0:v -map 1:a ' + outmp4 + ' -y'
+            # -c codec codec name
+            # -map [-]input_file_id[:stream_specifier][,sync_file_id[:stream_s set input stream mapping
+            print('đường dẫn .out.mp4:', outmp4)
+    print(coma)
+    if os.system(coma) != 0:
+        readfile(temp + "text.txt", 'w', coma)
+        return False
+    return True
 
 
 def readfile(file="uid.txt", mod="r", cont=None, jso: bool = False):
@@ -37,3 +82,9 @@ def readfile(file="uid.txt", mod="r", cont=None, jso: bool = False):
                 fil_e.write(cont)
             else:
                 json.dump(cont, fil_e, indent=2, ensure_ascii=False)
+
+
+def makemylisttxt(lis: list):
+    cont_: str = "'\nfile '".join(lis)
+    cont = f"file '{cont_}'"
+    readfile(file=listofsubtempaudio, mod="w", cont=cont, jso=False)
