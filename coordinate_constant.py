@@ -20,6 +20,8 @@ tempa: str = temp + '_audio.wav'
 osgetcwd = os.getcwd()
 debug = False
 
+f0predictorlist = ['crepe', 'pm', 'dio', 'harvest', 'rmvpe', 'fcpe', ]
+
 headers = {
     'Content-Type': 'application/json'
 }
