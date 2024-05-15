@@ -4,7 +4,7 @@ import streamlit as st
 
 from inference_main import main
 from coordinate_constant import \
-    raw, result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, \
+    raw, result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, f0predictorlist, \
     readfile, makemylisttxt, f_fmpeg, post2api
 from slicer2 import main as sli_mai
 
@@ -48,14 +48,7 @@ def main_loop():
         f0pre = st.radio(
             "Select a F0 predictor (f0 mean pooling will be enable when using crepe)",
             [
-                f"{s}" for s in [
-                'crepe',
-                'pm',
-                'dio',
-                'harvest',
-                'rmvpe',
-                'fcpe'
-            ]
+                f"{s}" for s in f0predictorlist
             ],
             index=1,
             captions=["usually works best", ]
