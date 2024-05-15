@@ -9,7 +9,7 @@ from coordinate_constant import \
 from slicer2 import main as sli_mai
 
 
-def main_loop():
+def main_loop_strl():
     global paramdict
 
     def dehi():
@@ -171,17 +171,20 @@ def main_loop():
     # TODO return None if status is busy
     if not post2api("GET"):
         st.write('error in post2api("GET")')
-        return None
-    try:
-        shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
-    except FileNotFoundError:
-        pass
+        if not debug:
+            return None
 
     paramdict["clean_names"] += \
         f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{os.path.splitext(aud___in.name)[0]}.flac'  # -n
     with open(cn_nes, "wb") as f:  # đọc nội dung file tải lên xong ghi lại vào clean_names.wav
         f.write(aud___in.getbuffer())
+    main_loop(paramdict, db_thresh)
 
+def main_loop(paramdict, db_thresh, streamlit: bool = True):
+    try:
+        shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
+    except FileNotFoundError:
+        pass
     sli_mai(['--out', raw, '--db_thresh', str(db_thresh), cn_nes])
 
     if debug:
@@ -228,10 +231,11 @@ def main_loop():
     flaclist.sort(key=lambda x: int(x.split('.')[0][len(os.path.splitext(cn_nes)[0] + '_'):]))
     makemylisttxt(flaclist)
     f_fmpeg('', None, paramdict["clean_names"], 'concat')
+    audiooutput = f'{paramdict["clean_names"][:-len(".flac")]}{ext}'
     f_fmpeg(
         paramdict["clean_names"],
         None,
-        f'{paramdict["clean_names"][:-len(".flac")]}{ext}',
+        audiooutput,
         'convert format (ext)'
     )
 
@@ -251,23 +255,23 @@ def main_loop():
             resu.remove(flac)
 
     for out___mp4 in resu:
+        file = os.path.join(result, out___mp4)
         if not out___mp4.endswith(ext):
-            continue
-        data = readfile(file=os.path.join(result, out___mp4), mod="rb")
-        st.write(f'{out___mp4}')
-        st.audio(data, format='wav')
-    #     with placeholder.container():
-    #         st.write(f'{out___mp4} với giọng đọc {speaker_id}')
-    #         st.download_button(
-    #             label="Download",
-    #             data=data,
-    #             file_name=out___mp4,
-    #             mime='wav',
-    #         )
+            try:
+                os.remove(file)
+            finally:
+                continue
+        if streamlit:
+            data = readfile(file=file, mod="rb")
+            st.write(f'{out___mp4}')
+            st.audio(data, format='wav')
+        # else:
+        #     os.rename(os.path.join(result, audiooutput), audiooutput)
     post2api("GET")
 
 
 paramdict: dict = dict()
 ext = os.path.splitext(cn_nes)[-1]
 if __name__ == '__main__':
-    main_loop()  # streamlit run strlit.py --server.port 8502
+    main_loop_strl()  # streamlit run strlit.py --server.port 8502
+    # python3 manage.py runserver 0.0.0.0:8502
