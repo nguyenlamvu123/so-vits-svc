@@ -5,6 +5,7 @@ logs_44k = f'logs{os.sep}44k'
 result = 'results'
 raw = 'raw'
 spkdict: dict = {
+    "huonglycover": "Nàng thơ",
     "nguyenngocngan": "Nguyễn Ngọc Ngạn demo",
     "songoku": "Songoku",
     "KyDuyen": "Kì Duyên",
@@ -70,11 +71,11 @@ def readfile(file="uid.txt", mod="r", cont=None, jso: bool = False):
     if not mod in ("w", "a", ):
         assert os.path.isfile(file), str(file)
     if mod == "r":
-        with open(file, mod, encoding="utf-8") as file:
+        with open(file, encoding="utf-8") as file:
             lines: list = file.readlines()
         return lines
     elif mod == "_r":
-        with open(file, mod[1], encoding="utf-8") as file:
+        with open(file, encoding="utf-8") as file:
             contents = file.read() if not jso else json.load(file)
         return contents
     elif mod == "rb":
