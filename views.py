@@ -29,6 +29,7 @@ def validate(request):
       paramdict["trans"] = str(speaker_id)  # -t
       
       db_thresh = request.POST.get("db_thresh")
+      outlocat = request.POST.get("output_location", '')
       
       spk_list = request.POST.get("spk_list")
       paramdict["spk_list"] = spk_list
@@ -50,5 +51,5 @@ def validate(request):
       paramdict["clean_names"] += f'{spk_list}_{os.path.splitext(model_path)[0]}___' + \
                                   f'{os.path.splitext(aud___in.split(os.sep)[-1])[0]}.flac'
 
-      main_loop(paramdict, db_thresh, False)
+      main_loop(paramdict, db_thresh, False, outlocat)
       return HttpResponse('ok')
