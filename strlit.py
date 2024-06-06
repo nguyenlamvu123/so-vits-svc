@@ -1,10 +1,9 @@
-import os, shutil
-
+﻿import os, shutil
 import streamlit as st
 
 from inference_main import main
 from coordinate_constant import \
-    raw, result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, f0predictorlist, \
+    osgetcwd, raw, result, logs_44k, spkdict, spkdict_, aud___intypelist, cn_nes, tempjson, debug, f0predictorlist, \
     readfile, makemylisttxt, f_fmpeg, post2api
 from slicer2 import main as sli_mai
 
@@ -176,15 +175,23 @@ def main_loop_strl():
 
     paramdict["clean_names"] += \
         f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{os.path.splitext(aud___in.name)[0]}.flac'  # -n
-    readfile(file=cn_nes, mod="wb", cont=aud___in.getbuffer())  # ghi lại nội dung file tải lên vào clean_names.wav
+    os.chdir(osgetcwd)
+    readfile(file=f"_{cn_nes}", mod="wb", cont=aud___in.getbuffer())  # ghi lại nội dung file tải lên vào f"_{cn_nes}"
     # sẽ dùng file tạm này để tách audio thành các audio con dựa trên khoảng lặng (hàm sli_mai())
     main_loop(paramdict, db_thresh)
 
-def main_loop(paramdict, db_thresh, streamlit: bool = True, outlocat='', *args):
+def main_loop(paramdict, db_thresh, streamlit: bool = True, outlocat='', demobool: bool = False, *args):
+    os.chdir(osgetcwd)
     try:
         shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
     except FileNotFoundError:
         pass
+    if demobool:
+        f_fmpeg(f"_{cn_nes}", None, cn_nes, 'cut video', "00:00:05", "00:01:05")
+    else:
+        if os.path.isfile(cn_nes):
+            os.remove(cn_nes)
+        os.rename(f"_{cn_nes}", cn_nes)
     sli_mai(['--out', raw, '--db_thresh', str(db_thresh), cn_nes])
 
     if debug:
@@ -241,10 +248,14 @@ def main_loop(paramdict, db_thresh, streamlit: bool = True, outlocat='', *args):
     if not outlocat == '':
         out___mp4_ = os.path.join(outlocat, f'_{audiooutput}') if outlocat.endswith(os.sep) \
             else outlocat
+        assert os.path.isfile(audiooutput)
+        assert os.path.exists(os.path.dirname(out___mp4_))
+        if os.path.isfile(out___mp4_):
+            os.remove(out___mp4_)
         os.rename(audiooutput, out___mp4_)
 
     resu = [paramdict["clean_names"], ] + os.listdir()
-    os.chdir('..')
+    os.chdir(osgetcwd)
     if debug:
         name = str(__file__).split(os.sep)[-1]
         folds = os.listdir()

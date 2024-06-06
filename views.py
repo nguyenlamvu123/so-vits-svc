@@ -4,7 +4,7 @@ from django.shortcuts import render
 import os
 
 from strlit import main_loop
-from coordinate_constant import logs_44k, cn_nes, readfile
+from coordinate_constant import logs_44k, cn_nes, readfile, osgetcwd
 
 
 @csrf_exempt
@@ -19,7 +19,8 @@ def validate(request):
       }
       
       aud___in = request.POST.get("filename")
-      with open(cn_nes, "wb") as f:  # đọc nội dung file tải lên xong ghi lại vào clean_names.wav
+      os.chdir(osgetcwd)
+      with open(f"_{cn_nes}", "wb") as f:  # đọc nội dung file tải lên xong ghi lại vào f"_{cn_nes}"
          f.write(readfile(aud___in, "rb"))
       
       f0pre = request.POST.get("f0_predictor")
@@ -39,6 +40,9 @@ def validate(request):
       model_path = request.POST.get("model_path")
       paramdict["model_path"] = f"{logs_44k_spklist}{os.sep}{model_path}"
 
+      demo = request.POST.get("demo", 0)
+      demobool: bool = False if int(demo) == 0 else True
+
       paramdict["auto_predict_f0"] = request.POST.get("auto_predict_f0", "0")
       paramdict["feature_retrieval"] = request.POST.get("feature_retrieval", "0")
       paramdict["use_spk_mix"] = request.POST.get("use_spk_mix", "0")
@@ -51,5 +55,9 @@ def validate(request):
       paramdict["clean_names"] += f'{spk_list}_{os.path.splitext(model_path)[0]}___' + \
                                   f'{os.path.splitext(aud___in.split(os.sep)[-1])[0]}.flac'
 
-      main_loop(paramdict, db_thresh, False, outlocat)
+      print(paramdict)
+      print("output_location: ", outlocat)
+      print("db_thresh: ", db_thresh)
+      if demobool: print('demo')
+      main_loop(paramdict, db_thresh, False, outlocat, demobool)
       return HttpResponse('ok')
