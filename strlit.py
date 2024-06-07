@@ -176,11 +176,11 @@ def main_loop_strl():
 
     paramdict["clean_names"] += \
         f'{spkdict_[spk_list]}_{os.path.splitext(model_path)[0]}___{os.path.splitext(aud___in.name)[0]}.flac'  # -n
-    with open(cn_nes, "wb") as f:  # đọc nội dung file tải lên xong ghi lại vào clean_names.wav
-        f.write(aud___in.getbuffer())
+    readfile(file=cn_nes, mod="wb", cont=aud___in.getbuffer())  # ghi lại nội dung file tải lên vào clean_names.wav
+    # sẽ dùng file tạm này để tách audio thành các audio con dựa trên khoảng lặng (hàm sli_mai())
     main_loop(paramdict, db_thresh)
 
-def main_loop(paramdict, db_thresh, streamlit: bool = True):
+def main_loop(paramdict, db_thresh, streamlit: bool = True, *args):
     try:
         shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
     except FileNotFoundError:
@@ -267,6 +267,8 @@ def main_loop(paramdict, db_thresh, streamlit: bool = True):
             st.audio(data, format='wav')
         # else:
         #     os.rename(os.path.join(result, audiooutput), audiooutput)
+    if 'test' in args:
+        return flaclist
     post2api("GET")
 
 

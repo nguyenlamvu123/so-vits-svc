@@ -157,3 +157,4 @@ filelists/
 pretrain/
 trained/**/
 
+testfile/
