@@ -180,7 +180,7 @@ def main_loop_strl():
     # sẽ dùng file tạm này để tách audio thành các audio con dựa trên khoảng lặng (hàm sli_mai())
     main_loop(paramdict, db_thresh)
 
-def main_loop(paramdict, db_thresh, streamlit: bool = True, *args):
+def main_loop(paramdict, db_thresh, streamlit: bool = True, outlocat='', *args):
     try:
         shutil.rmtree(raw)  # xóa đầu vào lần chạy trước
     except FileNotFoundError:
@@ -238,6 +238,10 @@ def main_loop(paramdict, db_thresh, streamlit: bool = True, *args):
         audiooutput,
         'convert format (ext)'
     )
+    if not outlocat == '':
+        out___mp4_ = os.path.join(outlocat, f'_{audiooutput}') if outlocat.endswith(os.sep) \
+            else outlocat
+        os.rename(audiooutput, out___mp4_)
 
     resu = [paramdict["clean_names"], ] + os.listdir()
     os.chdir('..')
