@@ -1,12 +1,12 @@
 import logging
 
 import soundfile
-from inference import infer_tool
-from inference.infer_tool import Svc
-from spkmix import spk_mix_map
+from .inference import infer_tool
+from .inference.infer_tool import Svc
+from .spkmix import spk_mix_map
 
 logging.getLogger('numba').setLevel(logging.WARNING)
-chunks_dict = infer_tool.read_temp("inference/chunks_temp.json")
+chunks_dict = infer_tool.read_temp("so_vits_svc/inference/chunks_temp.json")
 
 
 
@@ -112,7 +112,7 @@ def main(lis=None):
     
     infer_tool.fill_a_to_b(trans, clean_names)
     for clean_name, tran in zip(clean_names, trans):
-        raw_audio_path = f"raw/{clean_name}"
+        raw_audio_path = clean_name
         if "." not in raw_audio_path:
             raw_audio_path += ".wav"
         infer_tool.format_wav(raw_audio_path)

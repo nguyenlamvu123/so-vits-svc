@@ -87,22 +87,22 @@ def get_content(cmodel, y):
 
 def get_f0_predictor(f0_predictor,hop_length,sampling_rate,**kargs):
     if f0_predictor == "pm":
-        from modules.F0Predictor.PMF0Predictor import PMF0Predictor
+        from so_vits_svc.modules.F0Predictor.PMF0Predictor import PMF0Predictor
         f0_predictor_object = PMF0Predictor(hop_length=hop_length,sampling_rate=sampling_rate)
     elif f0_predictor == "crepe":
-        from modules.F0Predictor.CrepeF0Predictor import CrepeF0Predictor
+        from so_vits_svc.modules.F0Predictor.CrepeF0Predictor import CrepeF0Predictor
         f0_predictor_object = CrepeF0Predictor(hop_length=hop_length,sampling_rate=sampling_rate,device=kargs["device"],threshold=kargs["threshold"])
     elif f0_predictor == "harvest":
-        from modules.F0Predictor.HarvestF0Predictor import HarvestF0Predictor
+        from so_vits_svc.modules.F0Predictor.HarvestF0Predictor import HarvestF0Predictor
         f0_predictor_object = HarvestF0Predictor(hop_length=hop_length,sampling_rate=sampling_rate)
     elif f0_predictor == "dio":
-        from modules.F0Predictor.DioF0Predictor import DioF0Predictor
+        from so_vits_svc.modules.F0Predictor.DioF0Predictor import DioF0Predictor
         f0_predictor_object = DioF0Predictor(hop_length=hop_length,sampling_rate=sampling_rate) 
     elif f0_predictor == "rmvpe":
-        from modules.F0Predictor.RMVPEF0Predictor import RMVPEF0Predictor
+        from so_vits_svc.modules.F0Predictor.RMVPEF0Predictor import RMVPEF0Predictor
         f0_predictor_object = RMVPEF0Predictor(hop_length=hop_length,sampling_rate=sampling_rate,dtype=torch.float32 ,device=kargs["device"],threshold=kargs["threshold"])
     elif f0_predictor == "fcpe":
-        from modules.F0Predictor.FCPEF0Predictor import FCPEF0Predictor
+        from so_vits_svc.modules.F0Predictor.FCPEF0Predictor import FCPEF0Predictor
         f0_predictor_object = FCPEF0Predictor(hop_length=hop_length,sampling_rate=sampling_rate,dtype=torch.float32 ,device=kargs["device"],threshold=kargs["threshold"])
     else:
         raise Exception("Unknown f0 predictor")
@@ -110,43 +110,43 @@ def get_f0_predictor(f0_predictor,hop_length,sampling_rate,**kargs):
 
 def get_speech_encoder(speech_encoder,device=None,**kargs):
     if speech_encoder == "vec768l12":
-        from vencoder.ContentVec768L12 import ContentVec768L12
+        from so_vits_svc.vencoder.ContentVec768L12 import ContentVec768L12
         speech_encoder_object = ContentVec768L12(device = device)
     elif speech_encoder == "vec256l9":
-        from vencoder.ContentVec256L9 import ContentVec256L9
+        from so_vits_svc.vencoder.ContentVec256L9 import ContentVec256L9
         speech_encoder_object = ContentVec256L9(device = device)
     elif speech_encoder == "vec256l9-onnx":
-        from vencoder.ContentVec256L9_Onnx import ContentVec256L9_Onnx
+        from so_vits_svc.vencoder.ContentVec256L9_Onnx import ContentVec256L9_Onnx
         speech_encoder_object = ContentVec256L9_Onnx(device = device)
     elif speech_encoder == "vec256l12-onnx":
-        from vencoder.ContentVec256L12_Onnx import ContentVec256L12_Onnx
+        from so_vits_svc.vencoder.ContentVec256L12_Onnx import ContentVec256L12_Onnx
         speech_encoder_object = ContentVec256L12_Onnx(device = device)
     elif speech_encoder == "vec768l9-onnx":
-        from vencoder.ContentVec768L9_Onnx import ContentVec768L9_Onnx
+        from so_vits_svc.vencoder.ContentVec768L9_Onnx import ContentVec768L9_Onnx
         speech_encoder_object = ContentVec768L9_Onnx(device = device)
     elif speech_encoder == "vec768l12-onnx":
-        from vencoder.ContentVec768L12_Onnx import ContentVec768L12_Onnx
+        from so_vits_svc.vencoder.ContentVec768L12_Onnx import ContentVec768L12_Onnx
         speech_encoder_object = ContentVec768L12_Onnx(device = device)
     elif speech_encoder == "hubertsoft-onnx":
-        from vencoder.HubertSoft_Onnx import HubertSoft_Onnx
+        from so_vits_svc.vencoder.HubertSoft_Onnx import HubertSoft_Onnx
         speech_encoder_object = HubertSoft_Onnx(device = device)
     elif speech_encoder == "hubertsoft":
-        from vencoder.HubertSoft import HubertSoft
+        from so_vits_svc.vencoder.HubertSoft import HubertSoft
         speech_encoder_object = HubertSoft(device = device)
     elif speech_encoder == "whisper-ppg":
-        from vencoder.WhisperPPG import WhisperPPG
+        from so_vits_svc.vencoder.WhisperPPG import WhisperPPG
         speech_encoder_object = WhisperPPG(device = device)
     elif speech_encoder == "cnhubertlarge":
-        from vencoder.CNHubertLarge import CNHubertLarge
+        from so_vits_svc.vencoder.CNHubertLarge import CNHubertLarge
         speech_encoder_object = CNHubertLarge(device = device)
     elif speech_encoder == "dphubert":
-        from vencoder.DPHubert import DPHubert
+        from so_vits_svc.vencoder.DPHubert import DPHubert
         speech_encoder_object = DPHubert(device = device)
     elif speech_encoder == "whisper-ppg-large":
-        from vencoder.WhisperPPGLarge import WhisperPPGLarge
+        from so_vits_svc.vencoder.WhisperPPGLarge import WhisperPPGLarge
         speech_encoder_object = WhisperPPGLarge(device = device)
     elif speech_encoder == "wavlmbase+":
-        from vencoder.WavLMBasePlus import WavLMBasePlus
+        from so_vits_svc.vencoder.WavLMBasePlus import WavLMBasePlus
         speech_encoder_object = WavLMBasePlus(device = device)
     else:
         raise Exception("Unknown speech encoder")

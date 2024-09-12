@@ -4,12 +4,12 @@ from torch.nn import Conv1d, Conv2d
 from torch.nn import functional as F
 from torch.nn.utils import spectral_norm, weight_norm
 
-import modules.attentions as attentions
-import modules.commons as commons
-import modules.modules as modules
-import utils
-from modules.commons import get_padding
-from utils import f0_to_coarse
+from .modules import attentions as attentions
+from .modules import commons as commons
+from .modules import modules as modules
+from . import utils
+from .modules.commons import get_padding
+from .utils import f0_to_coarse
 
 
 class ResidualCouplingBlock(nn.Module):
@@ -424,14 +424,14 @@ class SynthesizerTrn(nn.Module):
         modules.set_Conv1dModel(self.use_depthwise_conv)
 
         if vocoder_name == "nsf-hifigan":
-            from vdecoder.hifigan.models import Generator
+            from so_vits_svc.vdecoder.hifigan.models import Generator
             self.dec = Generator(h=hps)
         elif vocoder_name == "nsf-snake-hifigan":
-            from vdecoder.hifiganwithsnake.models import Generator
+            from so_vits_svc.vdecoder.hifiganwithsnake.models import Generator
             self.dec = Generator(h=hps)
         else:
             print("[?] Unkown vocoder: use default(nsf-hifigan)")
-            from vdecoder.hifigan.models import Generator
+            from so_vits_svc.vdecoder.hifigan.models import Generator
             self.dec = Generator(h=hps)
 
         self.enc_q = Encoder(spec_channels, inter_channels, hidden_channels, 5, 1, 16, gin_channels=gin_channels)
