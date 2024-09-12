@@ -59,8 +59,8 @@ def f_fmpeg(duongdan: str, tempname: str or None = None, outmp4: str or None = N
                 ' -c copy -map 0:v -map 1:a ' + outmp4 + ' -y'
             # -c codec codec name
             # -map [-]input_file_id[:stream_specifier][,sync_file_id[:stream_s set input stream mapping
-            print('đường dẫn .out.mp4:', outmp4)
-    print(coma)
+            ifdebug: print('đường dẫn .out.mp4:', outmp4)
+    ifdebug: print(coma)
     if os.system(coma) != 0:
         readfile(temp + "text.txt", 'w', coma)
         return False

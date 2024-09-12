@@ -127,7 +127,7 @@ class Slicer:
             pos = rms_list[silence_start: silence_end + 1].argmin() + silence_start
             sil_tags.append((pos, total_frames + 1))
         # Apply and return slices.
-        if len(sil_tags) == 0:
+        if len(sil_tags) <= 1:
             return [waveform]
         else:
             chunks = []
