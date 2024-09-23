@@ -1,0 +1,3 @@
+[submodule "audio-slicer"]
+	path = crawl/ngoclan/audio-slicer
+	url = https://github.com/nguyenlamvu123/audio-slicer.git
