@@ -1,7 +1,10 @@
 import torch
 from fairseq import checkpoint_utils
 
-from so_vits_svc.vencoder.encoder import SpeechEncoder
+try:
+    from so_vits_svc.vencoder.encoder import SpeechEncoder
+except:
+    from vencoder.encoder import SpeechEncoder
 
 
 class ContentVec768L12(SpeechEncoder):

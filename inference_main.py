@@ -1,13 +1,23 @@
 import logging
 
+try:
+    from coordinate_constant import sub_modu, raw, result
+except:
+    from so_vits_svc.coordinate_constant import sub_modu, raw, result
+
 import soundfile
-from .inference import infer_tool
-from .inference.infer_tool import Svc
-from .spkmix import spk_mix_map
+if sub_modu:
+    from .inference import infer_tool
+    from .inference.infer_tool import Svc
+    from .spkmix import spk_mix_map
+else:
+    from inference import infer_tool
+    from inference.infer_tool import Svc
+    from spkmix import spk_mix_map
 
 logging.getLogger('numba').setLevel(logging.WARNING)
-chunks_dict = infer_tool.read_temp("so_vits_svc/inference/chunks_temp.json")
-
+infer_tool_read_temp = 'so_vits_svc/' if sub_modu else ''
+chunks_dict = infer_tool.read_temp(infer_tool_read_temp + "inference/chunks_temp.json")
 
 
 def main(lis=None):
@@ -103,7 +113,7 @@ def main(lis=None):
                     use_spk_mix,
                     args.feature_retrieval)
     
-    infer_tool.mkdir(["raw", "results"])
+    infer_tool.mkdir([raw, result])
     
     if len(spk_mix_map)<=1:
         use_spk_mix = False

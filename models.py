@@ -4,13 +4,25 @@ from torch.nn import Conv1d, Conv2d
 from torch.nn import functional as F
 from torch.nn.utils import spectral_norm, weight_norm
 
-from .modules import attentions as attentions
-from .modules import commons as commons
-from .modules import modules as modules
-from . import utils
-from .modules.commons import get_padding
-from .utils import f0_to_coarse
+try:
+    from coordinate_constant import sub_modu
+except:
+    from .coordinate_constant import sub_modu
 
+if not sub_modu:
+    from modules import attentions as attentions
+    from modules import commons as commons
+    from modules import modules as modules
+    import utils
+    from modules.commons import get_padding
+    from utils import f0_to_coarse
+else:
+    from .modules import attentions as attentions
+    from .modules import commons as commons
+    from .modules import modules as modules
+    from . import utils
+    from .modules.commons import get_padding
+    from .utils import f0_to_coarse
 
 class ResidualCouplingBlock(nn.Module):
     def __init__(self,
@@ -424,14 +436,23 @@ class SynthesizerTrn(nn.Module):
         modules.set_Conv1dModel(self.use_depthwise_conv)
 
         if vocoder_name == "nsf-hifigan":
-            from so_vits_svc.vdecoder.hifigan.models import Generator
+            if not sub_modu:
+                from vdecoder.hifigan.models import Generator
+            else:
+                from so_vits_svc.vdecoder.hifigan.models import Generator
             self.dec = Generator(h=hps)
         elif vocoder_name == "nsf-snake-hifigan":
-            from so_vits_svc.vdecoder.hifiganwithsnake.models import Generator
+            if not sub_modu:
+                from vdecoder.hifiganwithsnake.models import Generator
+            else:
+                from so_vits_svc.vdecoder.hifiganwithsnake.models import Generator
             self.dec = Generator(h=hps)
         else:
             print("[?] Unkown vocoder: use default(nsf-hifigan)")
-            from so_vits_svc.vdecoder.hifigan.models import Generator
+            if not sub_modu:
+                from vdecoder.hifigan.models import Generator
+            else:
+                from so_vits_svc.vdecoder.hifigan.models import Generator
             self.dec = Generator(h=hps)
 
         self.enc_q = Encoder(spec_channels, inter_channels, hidden_channels, 5, 1, 16, gin_channels=gin_channels)
