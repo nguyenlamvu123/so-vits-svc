@@ -192,7 +192,7 @@ def main_loop(paramdict, db_thresh, streamlit: bool = True, outlocat='', demoboo
         if os.path.isfile(cn_nes):
             os.remove(cn_nes)
         os.rename(f"_{cn_nes}", cn_nes)
-    sli_mai(['--out', raw, '--db_thresh', str(db_thresh), cn_nes])
+    sli_mai(['--out', raw, '--db_thresh', str(db_thresh), cn_nes])  # chia nhỏ video qua các khoảng lặng
 
     if debug:
         command = "python3 inference_main.py" + \

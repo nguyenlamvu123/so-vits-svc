@@ -1,8 +1,17 @@
 import torch
 from torchaudio.transforms import Resample
 
-from vdecoder.nsf_hifigan.models import load_config, load_model
-from vdecoder.nsf_hifigan.nvSTFT import STFT
+try:
+    from coordinate_constant import sub_modu
+except:
+    from ..coordinate_constant import sub_modu
+
+if not sub_modu:
+    from vdecoder.nsf_hifigan.models import load_config, load_model
+    from vdecoder.nsf_hifigan.nvSTFT import STFT
+else:
+    from ..vdecoder.nsf_hifigan.models import load_config, load_model
+    from ..vdecoder.nsf_hifigan.nvSTFT import STFT
 
 
 class Vocoder:

@@ -1,11 +1,14 @@
 import torch
 from fairseq import checkpoint_utils
 
-from vencoder.encoder import SpeechEncoder
+try:
+    from so_vits_svc.vencoder.encoder import SpeechEncoder
+except:
+    from vencoder.encoder import SpeechEncoder
 
 
 class ContentVec768L12(SpeechEncoder):
-    def __init__(self, vec_path="pretrain/checkpoint_best_legacy_500.pt", device=None):
+    def __init__(self, vec_path="../so_vits_svc/pretrain/checkpoint_best_legacy_500.pt", device=None):
         super().__init__()
         print("load model(s) from {}".format(vec_path))
         self.hidden_dim = 768

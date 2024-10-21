@@ -1,8 +1,16 @@
 import torch
 
-from modules.F0Predictor.crepe import CrepePitchExtractor
-from modules.F0Predictor.F0Predictor import F0Predictor
+try:
+    from coordinate_constant import sub_modu
+except:
+    from so_vits_svc.coordinate_constant import sub_modu
 
+if sub_modu:
+    from so_vits_svc.modules.F0Predictor.crepe import CrepePitchExtractor
+    from so_vits_svc.modules.F0Predictor.F0Predictor import F0Predictor
+else:
+    from modules.F0Predictor.crepe import CrepePitchExtractor
+    from modules.F0Predictor.F0Predictor import F0Predictor
 
 class CrepeF0Predictor(F0Predictor):
     def __init__(self,hop_length=512,f0_min=50,f0_max=1100,device=None,sampling_rate=44100,threshold=0.05,model="full"):

@@ -16,11 +16,23 @@ import soundfile
 import torch
 import torchaudio
 
-import cluster
-import utils
-from diffusion.unit2mel import load_model_vocoder
-from inference import slicer
-from models import SynthesizerTrn
+try:
+    from coordinate_constant import sub_modu, raw
+except:
+    from ..coordinate_constant import sub_modu, raw
+
+if not sub_modu:
+    import cluster
+    import utils
+    from diffusion.unit2mel import load_model_vocoder
+    from inference import slicer
+    from models import SynthesizerTrn
+else:
+    from .. import cluster
+    from .. import utils
+    from so_vits_svc.diffusion.unit2mel import load_model_vocoder
+    from so_vits_svc.inference import slicer
+    from so_vits_svc.models import SynthesizerTrn
 
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
@@ -377,6 +389,11 @@ class Svc(object):
             if len(self.spk2id) == 1:
                 spk = list(self.spk2id.keys())[0]
                 use_spk_mix = False
+
+        if not os.path.isfile(raw_audio_path):
+            raw_audio_path = f'{raw}{os.sep}{raw_audio_path}'
+            assert os.path.isfile(raw_audio_path)
+
         wav_path = Path(raw_audio_path).with_suffix('.wav')
         chunks = slicer.cut(wav_path, db_thresh=slice_db)
         audio_data, audio_sr = slicer.chunks2audio(wav_path, chunks)

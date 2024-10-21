@@ -2,10 +2,10 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-import modules.attentions as attentions
-import modules.commons as commons
-from modules.commons import get_padding, init_weights
-from modules.DSConv import (
+from . import attentions as attentions
+from . import commons as commons
+from .commons import get_padding, init_weights
+from .DSConv import (
     Depthwise_Separable_Conv1D,
     remove_weight_norm_modules,
     weight_norm_modules,
