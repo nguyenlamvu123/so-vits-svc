@@ -158,3 +158,5 @@ pretrain/
 trained/**/
 
 testfile/
+crawl/*.wav
+crawl/*.mp4
