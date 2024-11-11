@@ -20,7 +20,7 @@ temp: str = 'temp'
 tempa: str = temp + '_audio.wav'
 osgetcwd = os.getcwd()
 debug = False
-sub_modu: bool = False  # bật cờ này khi được gọi đến bởi tool chuyển ngữ (Voice_CV) (c2ol) chứ không phải chạy độc lập
+sub_modu: bool = True  # bật cờ này khi được gọi đến bởi tool chuyển ngữ (Voice_CV) (c2ol) chứ không phải chạy độc lập
 
 f0predictorlist = ['crepe', 'pm', 'dio', 'harvest', 'rmvpe', 'fcpe', ]
 

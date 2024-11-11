@@ -1,2 +1,4 @@
 selenium
 jupyter
+demucs
+yt-dlp
